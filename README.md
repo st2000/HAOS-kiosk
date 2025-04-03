@@ -7,7 +7,9 @@ Display HA dashboards in kiosk mode directly on your HAOS server
 Launch X windows on local HAOS server followed by OpenBox window manager and Luakit browser.<br>
 Standard mouse and keyboard interactions should work automatically
 
-Note: that Luakit is launched in kiosk-like (*passthrough*) mode.<br>
+**NOTE:** You must enter your HA username and password in the *Configuration* tab for add-on to start
+
+Note that the Luakit is launched in kiosk-like (*passthrough*) mode.<br>
 To enter *normal* mode (similar to command mode in vi), press `ctl-alt-esc`<br>
 You can then return to *passthrough* mode by pressing `ctl-Z` or enter *insert* mode by pressing `i`<br>
 See luakit documentation for available commands.<br>
