@@ -1,4 +1,5 @@
 #!/usr/bin/with-contenv bashio
+# shellcheck shell=bash
 ################################################################################
 # Add-on: HAOS Kiosk Display (haoskiosk)
 # File: run.sh
@@ -71,8 +72,8 @@ if [ -z "$HA_USERNAME" ] || [ -z "$HA_PASSWORD" ]; then
 fi
 
 ################################################################################
-### Start D-Bus session in the background (otherwise luakit hangs for 5 minutes befor starting)
-dbus-daemon --session --address=$DBUS_SESSION_BUS_ADDRESS &
+### Start D-Bus session in the background (otherwise luakit hangs for 5 minutes before starting)
+dbus-daemon --session --address="$DBUS_SESSION_BUS_ADDRESS" &
 echo "DBUS started..." >&2
 
 ### Start Xorg in the background
@@ -83,39 +84,38 @@ echo "DBUS started..." >&2
 if [ -e "/dev/tty0" ]; then
     echo "Attempting to (temporarily) delete /dev/tty0..." >&2
     mount -o remount,rw /dev
-    if [ $? -ne 0 ]; then
-	echo "Failed to remount /dev as read-write..." >&2
-	exit 1
+    if ! mount -o remount,rw /dev ; then
+        echo "Failed to remount /dev as read-write..." >&2
+        exit 1
     fi
-    rm /dev/tty0
-    if [ $? -ne 0 ]; then
-	mount -o remount,ro /dev	
-	echo "Failed to delete /dev/tty0..." >&2
-	exit 1
+    if  ! rm /dev/tty0 ; then
+        mount -o remount,ro /dev
+        echo "Failed to delete /dev/tty0..." >&2
+        exit 1
     fi
     TTY0_DELETED=1
 fi
 
-Xorg $DISPLAY -layout Layout${HDMI_PORT} & < /dev/null
+Xorg "$DISPLAY" -layout "Layout${HDMI_PORT}" </dev/null &
 
 XSTARTUP=30
-for ((i=0; i<=$XSTARTUP; i++)); do
-  if xset q >/dev/null 2>&1; then
-    break
-  fi
-  sleep 1
+for ((i=0; i<=XSTARTUP; i++)); do
+    if xset q >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
 done
 
 #Restore /dev/tty0 and 'ro' mode for /dev if deleted
-if [ -n "TTY0_DELETED" ]; then
+if [ -n "$TTY0_DELETED" ]; then
     if ! ( mknod -m 620 /dev/tty0 c 4 0 &&  mount -o remount,ro /dev ); then
-	echo "Failed to restore /dev/tty0 and remount /dev/ read only..." >&2
+        echo "Failed to restore /dev/tty0 and remount /dev/ read only..." >&2
     fi
 fi
 
 if ! xset q >/dev/null 2>&1; then
-  echo "Error: X server failed to start within $XSTARTUP seconds." >&2
-  exit 1
+    echo "Error: X server failed to start within $XSTARTUP seconds." >&2
+    exit 1
 fi
 echo "X started successfully..." >&2
 
