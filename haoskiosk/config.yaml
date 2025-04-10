@@ -32,7 +32,7 @@ security_opt:
 options:
   ha_url: "http://localhost:8123"
   ha_dashboard: ""
-  login_delay: 1.0 
+  login_delay: 1.0
   hdmi_port: 0
   screen_timeout: 600
   browser_refresh: 600
