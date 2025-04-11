@@ -1,5 +1,7 @@
 #!/usr/bin/with-contenv bashio
 # shellcheck shell=bash
+# Clean up on exit:
+trap '[ -n "$(jobs -p)" ] && kill $(jobs -p); [ -n "$TTY0_DELETED" ] && mknod -m 620 /dev/tty0 c 4 0 && mount -o remount,ro /dev; exit' INT TERM EXIT
 ################################################################################
 # Add-on: HAOS Kiosk Display (haoskiosk)
 # File: run.sh
@@ -67,15 +69,14 @@ HDMI_PORT="${HDMI_PORT:-0}"
 
 #Validate environment variables set by config.yaml
 if [ -z "$HA_USERNAME" ] || [ -z "$HA_PASSWORD" ]; then
-    echo "Error: HA_USERNAME and HA_PASSWORD must be set" >&2
+    bashio::log.error "Error: HA_USERNAME and HA_PASSWORD must be set"
     exit 1
 fi
 
 ################################################################################
 ### Start D-Bus session in the background (otherwise luakit hangs for 5 minutes before starting)
-mkdir -p /tmp/dbus-session
-eval `dbus-launch --sh-syntax`
-echo "DBUS started..." >&2
+dbus-daemon --session --address=$DBUS_SESSION_BUS_ADDRESS &
+bashio::log.info "DBUS started..."
 
 ### Start Xorg in the background
 rm -rf /tmp/.X*-lock #Cleanup old versions
@@ -85,18 +86,19 @@ rm -rf /tmp/.X*-lock #Cleanup old versions
 #First, remount /dev as read-write since X absolutely, must have /dev/tty access
 #Note: need to use the version in util-linux, not busybox
 if [ -e "/dev/tty0" ]; then
-    echo "Attempting to (temporarily) delete /dev/tty0..." >&2
+    bashio::log.info "Attempting to (temporarily) delete /dev/tty0..." >&2
     mount -o remount,rw /dev
     if ! mount -o remount,rw /dev ; then
-        echo "Failed to remount /dev as read-write..." >&2
+        bashio::log.error "Failed to remount /dev as read-write..." >&2
         exit 1
     fi
     if  ! rm /dev/tty0 ; then
         mount -o remount,ro /dev
-        echo "Failed to delete /dev/tty0..." >&2
+        bashio::log.error "Failed to delete /dev/tty0..." >&2
         exit 1
     fi
     TTY0_DELETED=1
+    bashio::log.info "Deleted /dev/tty0 successfully..." >&2
 fi
 
 Xorg "$DISPLAY" -layout "Layout${HDMI_PORT}" </dev/null &
@@ -111,16 +113,18 @@ done
 
 #Restore /dev/tty0 and 'ro' mode for /dev if deleted
 if [ -n "$TTY0_DELETED" ]; then
-    if ! ( mknod -m 620 /dev/tty0 c 4 0 &&  mount -o remount,ro /dev ); then
-        echo "Failed to restore /dev/tty0 and remount /dev/ read only..." >&2
+    if ( mknod -m 620 /dev/tty0 c 4 0 &&  mount -o remount,ro /dev ); then
+	bashio::log.info "Restored /dev/tty0 successfully..." >&2
+    else
+        bashio::log.error "Failed to restore /dev/tty0 and remount /dev/ read only..." >&2
     fi
 fi
 
 if ! xset q >/dev/null 2>&1; then
-    echo "Error: X server failed to start within $XSTARTUP seconds." >&2
+    bashio::log.error "Error: X server failed to start within $XSTARTUP seconds." >&2
     exit 1
 fi
-echo "X started successfully..." >&2
+bashio::log.info "X started successfully..." >&2
 
 #Stop console blinking cursor (this projects through the X-screen)
 echo -e "\033[?25l" > /dev/console
@@ -130,24 +134,24 @@ openbox &
 O_PID=$!
 sleep 0.5  #Ensure Openbox starts
 if ! kill -0 "$O_PID" 2>/dev/null; then #Checks if process alive
-    echo "Failed to start Openbox window manager" >&2
+    bashio::log.error "Failed to start Openbox window manager" >&2
     exit 1
 fi
-echo "Openbox started successfully..." >&2
+bashio::log.info "Openbox started successfully..." >&2
 
 ### Configure screen timeout (Note: DPMS needs to be enabled/disabled *after* starting Openbox)
 if [ "$SCREEN_TIMEOUT" -eq 0 ]; then #Disable screen saver and DPMS for no timeout
     xset s 0
     xset dpms 0 0 0
     xset -dpms
-    echo "Screen timeout disabled..." >&2
+    bashio::log.info "Screen timeout disabled..." >&2
 else
     xset s "$SCREEN_TIMEOUT"
     xset dpms "$SCREEN_TIMEOUT" "$SCREEN_TIMEOUT" "$SCREEN_TIMEOUT"  #DPMS standby, suspend, off
     xset +dpms
-    echo "Screen timeout after $SCREEN_TIMEOUT seconds..." >&2
+    bashio::log.info "Screen timeout after $SCREEN_TIMEOUT seconds..." >&2
 fi
 
 ### Run Luakit in the foreground
-echo "Launching Luakit browser..." >&2
+bashio::log.info "Launching Luakit browser..." >&2
 exec luakit -U "$HA_URL/$HA_DASHBOARD"
