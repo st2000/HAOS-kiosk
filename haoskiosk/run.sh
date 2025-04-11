@@ -27,6 +27,7 @@ trap '[ -n "$(jobs -p)" ] && kill $(jobs -p); [ -n "$TTY0_DELETED" ] && mknod -m
 #     - Launch fresh Luakit browser for url: $HA_URL/$HA_DASHBOARD
 #
 ################################################################################
+bashio::log.info "Starting haoskiosk..."
 ### Get config variables from HA add-on & set environment variables
 HA_USERNAME=$(bashio::config 'ha_username')
 HA_USERNAME="${HA_USERNAME//null/}"
@@ -76,7 +77,6 @@ fi
 ################################################################################
 ### Start D-Bus session in the background (otherwise luakit hangs for 5 minutes before starting)
 dbus-daemon --session --address=$DBUS_SESSION_BUS_ADDRESS &
-bashio::log.info "DBUS started..."
 
 ### Start Xorg in the background
 rm -rf /tmp/.X*-lock #Cleanup old versions
