@@ -1,7 +1,7 @@
 --[[
 Add-on: HAOS Kiosk Display (haoskiosk)
 File: userconf.lua for HA minimal browser run on server
-Version: 0.9.5
+Version: 0.9.7
 Copyright Jeff Kosowsky
 Date: March 2025
 
@@ -10,7 +10,7 @@ Code does the following:
    - Sets zooms level to value of $ZOOM_LEVEL (default 100%)
     - Starts first window in 'passthrough' mode so that you can type text as needed without
       triggering browser commands
-    - Auto-logs in to Home Assisant using $HA_USERNAME and $HA_PASSWORD
+    - Auto-logs in to Home Assistant using $HA_USERNAME and $HA_PASSWORD
     - Redefines key to return to normal mode (used for commands) from 'passthrough' mode to: 'Ctl-Alt-Esc'
       (rather than just 'Esc') to prevent unintended  returns to normal mode and activation of unwanted commands
     - Prevent printing of '--PASS THROUGH--' status line when in 'passthrough' mode
@@ -18,7 +18,7 @@ Code does the following:
       NOTE: this is important since console messages overwrite dashboards
 ]]
 
--- ----------------------------------------------------------------------- 
+-- -----------------------------------------------------------------------
 -- Load required Luakit modules
 local window = require "window"
 local webview = require "webview"
@@ -26,7 +26,7 @@ local settings = require "settings"
 local modes = package.loaded["modes"]
 -- local msg = require "msg" -- DEBUG: Required for debugging messages
 
--- ----------------------------------------------------------------------- 
+-- -----------------------------------------------------------------------
 -- Load in environment variables to configure options
 local username = os.getenv("HA_USERNAME") or ""
 local password = os.getenv("HA_PASSWORD") or ""
@@ -36,7 +36,7 @@ ha_url = string.gsub(ha_url, "/+$", "") -- Strip trailing '/'
 local browser_refresh = tonumber(os.getenv("BROWSER_REFRESH")) or 600  -- Refresh interval in seconds, default 600
 local zoom_level = tonumber(os.getenv("ZOOM_LEVEL")) or 100
 
--- ----------------------------------------------------------------------- 
+-- -----------------------------------------------------------------------
 -- Set window to fullscreen
 window.add_signal("init", function(w)
     w.win.fullscreen = true
@@ -45,7 +45,7 @@ end)
 -- Set zoom level for windows (default 100%)
 settings.webview.zoom_level = zoom_level
 
--- ----------------------------------------------------------------------- 
+-- -----------------------------------------------------------------------
 local first_window = true
 webview.add_signal("init", function(view)
     -- Listen for page load events
@@ -69,7 +69,7 @@ webview.add_signal("init", function(view)
 	-- Option#2 [NOT USED] Set passthrough mode for all windows with url beginning with 'ha_url'
 	if v.uri:match("^" .. ha_url) then
 	    webview.window(v):set_mode("passthrough")
---	    msg.info("Setting passthrough mode...") -- DEBUG	    
+--	    msg.info("Setting passthrough mode...") -- DEBUG
 	end
 ]]
 
@@ -109,7 +109,7 @@ webview.add_signal("init", function(view)
 end)
 
 
--- ----------------------------------------------------------------------- 
+-- -----------------------------------------------------------------------
 -- Redefine <Esc> to <Ctl-Alt-Esc> to exit current mode and enter normal mode
 modes.remove_binds({"passthrough"}, {"<Escape>"})
 modes.add_binds("passthrough", {

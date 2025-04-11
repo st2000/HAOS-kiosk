@@ -1,8 +1,12 @@
 #!/usr/bin/with-contenv bashio
+# shellcheck shell=bash
+# Clean up on exit:
+TTY0_DELETED="" #Need to set to empty string since runs with nounset=on (like set -u)
+trap '[ -n "$(jobs -p)" ] && kill $(jobs -p); [ -n "$TTY0_DELETED" ] && mknod -m 620 /dev/tty0 c 4 0 && mount -o remount,ro /dev; exit' INT TERM EXIT
 ################################################################################
 # Add-on: HAOS Kiosk Display (haoskiosk)
 # File: run.sh
-# Version: 0.9.6
+# Version: 0.9.7
 # Copyright Jeff Kosowsky
 # Date: April 2025
 #
@@ -24,6 +28,7 @@
 #     - Launch fresh Luakit browser for url: $HA_URL/$HA_DASHBOARD
 #
 ################################################################################
+bashio::log.info "Starting haoskiosk..."
 ### Get config variables from HA add-on & set environment variables
 HA_USERNAME=$(bashio::config 'ha_username')
 HA_USERNAME="${HA_USERNAME//null/}"
@@ -66,58 +71,61 @@ HDMI_PORT="${HDMI_PORT:-0}"
 
 #Validate environment variables set by config.yaml
 if [ -z "$HA_USERNAME" ] || [ -z "$HA_PASSWORD" ]; then
-    echo "Error: HA_USERNAME and HA_PASSWORD must be set" >&2
+    bashio::log.error "Error: HA_USERNAME and HA_PASSWORD must be set"
     exit 1
 fi
 
 ################################################################################
-### Start D-Bus session in the background (otherwise luakit hangs for 5 minutes befor starting)
-dbus-daemon --session --address=$DBUS_SESSION_BUS_ADDRESS &
-echo "DBUS started..." >&2
+### Start D-Bus session in the background (otherwise luakit hangs for 5 minutes before starting)
+dbus-daemon --session --address="$DBUS_SESSION_BUS_ADDRESS" &
 
 ### Start Xorg in the background
+rm -rf /tmp/.X*-lock #Cleanup old versions
+
 #Note first need to delete /dev/tty0 since X won't start if it is there,
 #because X doesn't have permissions to access it in the container
 #First, remount /dev as read-write since X absolutely, must have /dev/tty access
 #Note: need to use the version in util-linux, not busybox
 if [ -e "/dev/tty0" ]; then
-    echo "Attempting to (temporarily) delete /dev/tty0..." >&2
+    bashio::log.info "Attempting to (temporarily) delete /dev/tty0..."
     mount -o remount,rw /dev
-    if [ $? -ne 0 ]; then
-	echo "Failed to remount /dev as read-write..." >&2
-	exit 1
+    if ! mount -o remount,rw /dev ; then
+        bashio::log.error "Failed to remount /dev as read-write..."
+        exit 1
     fi
-    rm /dev/tty0
-    if [ $? -ne 0 ]; then
-	mount -o remount,ro /dev	
-	echo "Failed to delete /dev/tty0..." >&2
-	exit 1
+    if  ! rm /dev/tty0 ; then
+        mount -o remount,ro /dev
+        bashio::log.error "Failed to delete /dev/tty0..."
+        exit 1
     fi
     TTY0_DELETED=1
+    bashio::log.info "Deleted /dev/tty0 successfully..."
 fi
 
-Xorg $DISPLAY -layout Layout${HDMI_PORT} & < /dev/null
+Xorg "$DISPLAY" -layout "Layout${HDMI_PORT}" </dev/null &
 
 XSTARTUP=30
-for ((i=0; i<=$XSTARTUP; i++)); do
-  if xset q >/dev/null 2>&1; then
-    break
-  fi
-  sleep 1
+for ((i=0; i<=XSTARTUP; i++)); do
+    if xset q >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
 done
 
 #Restore /dev/tty0 and 'ro' mode for /dev if deleted
-if [ -n "TTY0_DELETED" ]; then
-    if ! ( mknod -m 620 /dev/tty0 c 4 0 &&  mount -o remount,ro /dev ); then
-	echo "Failed to restore /dev/tty0 and remount /dev/ read only..." >&2
+if [ -n "$TTY0_DELETED" ]; then
+    if ( mknod -m 620 /dev/tty0 c 4 0 &&  mount -o remount,ro /dev ); then
+        bashio::log.info "Restored /dev/tty0 successfully..."
+    else
+        bashio::log.error "Failed to restore /dev/tty0 and remount /dev/ read only..."
     fi
 fi
 
 if ! xset q >/dev/null 2>&1; then
-  echo "Error: X server failed to start within $XSTARTUP seconds." >&2
-  exit 1
+    bashio::log.error "Error: X server failed to start within $XSTARTUP seconds."
+    exit 1
 fi
-echo "X started successfully..." >&2
+bashio::log.info "X started successfully..."
 
 #Stop console blinking cursor (this projects through the X-screen)
 echo -e "\033[?25l" > /dev/console
@@ -127,24 +135,24 @@ openbox &
 O_PID=$!
 sleep 0.5  #Ensure Openbox starts
 if ! kill -0 "$O_PID" 2>/dev/null; then #Checks if process alive
-    echo "Failed to start Openbox window manager" >&2
+    bashio::log.error "Failed to start Openbox window manager"
     exit 1
 fi
-echo "Openbox started successfully..." >&2
+bashio::log.info "Openbox started successfully..."
 
 ### Configure screen timeout (Note: DPMS needs to be enabled/disabled *after* starting Openbox)
 if [ "$SCREEN_TIMEOUT" -eq 0 ]; then #Disable screen saver and DPMS for no timeout
     xset s 0
     xset dpms 0 0 0
     xset -dpms
-    echo "Screen timeout disabled..." >&2
+    bashio::log.info "Screen timeout disabled..."
 else
     xset s "$SCREEN_TIMEOUT"
     xset dpms "$SCREEN_TIMEOUT" "$SCREEN_TIMEOUT" "$SCREEN_TIMEOUT"  #DPMS standby, suspend, off
     xset +dpms
-    echo "Screen timeout after $SCREEN_TIMEOUT seconds..." >&2
+    bashio::log.info "Screen timeout after $SCREEN_TIMEOUT seconds..."
 fi
 
 ### Run Luakit in the foreground
-echo "Launching Luakit browser..." >&2
+bashio::log.info "Launching Luakit browser..."
 exec luakit -U "$HA_URL/$HA_DASHBOARD"

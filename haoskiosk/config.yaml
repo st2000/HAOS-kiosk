@@ -1,7 +1,7 @@
 name: "HAOS Kiosk Display"
 description: >
   Start X server and browser on local HAOS server and display dashboards in kiosk mode (Jeff Kosowsky)
-version: "0.9.6"
+version: "0.9.7"
 slug: "haoskiosk"
 
 arch:
@@ -17,7 +17,6 @@ host_dbus: true
 init: false
 
 devices:
-  - /dev/dri
   - /dev/fb0
   - /dev/fb1
   - /dev/input/event0
@@ -32,7 +31,7 @@ security_opt:
 options:
   ha_url: "http://localhost:8123"
   ha_dashboard: ""
-  login_delay: 1.0 
+  login_delay: 1.0
   hdmi_port: 0
   screen_timeout: 600
   browser_refresh: 600
