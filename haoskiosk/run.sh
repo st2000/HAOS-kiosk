@@ -1,6 +1,7 @@
 #!/usr/bin/with-contenv bashio
 # shellcheck shell=bash
 # Clean up on exit:
+TTY0_DELETED="" #Need to set to empty string since runs with nounset=on (like set -u)
 trap '[ -n "$(jobs -p)" ] && kill $(jobs -p); [ -n "$TTY0_DELETED" ] && mknod -m 620 /dev/tty0 c 4 0 && mount -o remount,ro /dev; exit' INT TERM EXIT
 ################################################################################
 # Add-on: HAOS Kiosk Display (haoskiosk)
@@ -76,7 +77,7 @@ fi
 
 ################################################################################
 ### Start D-Bus session in the background (otherwise luakit hangs for 5 minutes before starting)
-dbus-daemon --session --address=$DBUS_SESSION_BUS_ADDRESS &
+dbus-daemon --session --address="$DBUS_SESSION_BUS_ADDRESS" &
 
 ### Start Xorg in the background
 rm -rf /tmp/.X*-lock #Cleanup old versions
