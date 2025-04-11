@@ -5,7 +5,7 @@ exclude:
 repos:
   - repo: https://github.com/executablebooks/mdformat
     # Do this before other tools "fixing" the line endings
-    rev: 0.7.17
+    rev: 0.7.22
     hooks:
       - id: mdformat
         name: Format Markdown
@@ -20,7 +20,7 @@ repos:
           - setuptools
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       # - id: no-commit-to-branch
       #  args: [--branch, main]
@@ -46,7 +46,7 @@ repos:
         additional_dependencies:
           - setuptools
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.3.0
+    rev: v2.4.1
     hooks:
       - id: codespell
   - repo: https://github.com/shellcheck-py/shellcheck-py
