@@ -1,6 +1,6 @@
 # HAOS-kiosk
 
-Display HA dashboards in kiosk mode directly on your HAOS server
+Display HA dashboards in kiosk mode directly on your HAOS server.
 
 ## Author: Jeff Kosowsky
 
@@ -15,9 +15,9 @@ Standard mouse and keyboard interactions should work automatically.
 
 Note that the Luakit is launched in kiosk-like (*passthrough*) mode.\
 To enter *normal* mode (similar to command mode in `vi`), press
-`ctl-alt-esc`\
+`ctl-alt-esc`.\
 You can then return to *passthrough* mode by pressing `ctl-Z` or enter
-*insert* mode by pressing `i`\
+*insert* mode by pressing `i`.\
 See luakit documentation for available commands.\
 In general, you want to stay in `passthrough` mode.
 
@@ -25,11 +25,11 @@ In general, you want to stay in `passthrough` mode.
 
 ### HA Username [required]
 
-Enter your Home Assistant login name
+Enter your Home Assistant login name.
 
 ### HA Password [required]
 
-Enter your Home Assistant password
+Enter your Home Assistant password.
 
 ### HA URL
 
@@ -62,11 +62,11 @@ Default is `600` seconds.
 ### Browser Refresh
 
 Time between browser refreshes. Set to `0` to disable.\
-Recommended becauseon default RPi config, console errors *may* overwrite
-the dashboard.\
+Recommended because with the default RPi config, console errors *may*
+overwrite the dashboard.\
 Default is `600` seconds.
 
 ### Zoom Level
 
-Level of zoom with `100` being 100%. \
+Level of zoom with `100` being 100%.\
 Default is `100`.
