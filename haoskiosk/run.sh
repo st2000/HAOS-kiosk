@@ -73,10 +73,13 @@ fi
 
 ################################################################################
 ### Start D-Bus session in the background (otherwise luakit hangs for 5 minutes before starting)
-dbus-daemon --session --address="$DBUS_SESSION_BUS_ADDRESS" &
+mkdir -p /tmp/dbus-session
+eval `dbus-launch --sh-syntax`
 echo "DBUS started..." >&2
 
 ### Start Xorg in the background
+rm -rf /tmp/.X*-lock #Cleanup old versions
+
 #Note first need to delete /dev/tty0 since X won't start if it is there,
 #because X doesn't have permissions to access it in the container
 #First, remount /dev as read-write since X absolutely, must have /dev/tty access
