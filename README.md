@@ -13,9 +13,9 @@ Standard mouse and keyboard interactions should work automatically.
 **NOTE:** You must enter your HA username and password in the
 *Configuration* tab for add-on to start.
 
-**NOTE:** If display does not show up, reboot with display attached (via HDMI cord)
+**NOTE:** If display does not show up, reboot with display attached (via HDMI cable)
 
-Note that the Luakit is launched in kiosk-like (*passthrough*) mode.\
+**Note:** Luakit is launched in kiosk-like (*passthrough*) mode.\
 To enter *normal* mode (similar to command mode in `vi`), press
 `ctl-alt-esc`.\
 You can then return to *passthrough* mode by pressing `ctl-Z` or enter
