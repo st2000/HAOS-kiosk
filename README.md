@@ -77,7 +77,7 @@ HDMI0 onto HDMI1.
 ### HA Theme
 
 Theme used by HA frontend (device-specific).\
-Options include:
+Options include:\
 
 - Auto
 - Dark
@@ -87,7 +87,7 @@ Options include:
 ### HA Sidebar
 
 Presentation of left sidebar menu (device-specific).\
-Options include:
+Options include:\
 
 - Full (icons + names)
 - Narrow (icons only)
