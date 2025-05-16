@@ -85,7 +85,8 @@ Options include:
 
 ### HA Sidebar
 
-Presentation of left sidebar menu:
+Presentation of left sidebar menu (device-specific).\
+Options include:
 - Full (icons + names)
 - Narrow (icons only)
 - None (hidden)
