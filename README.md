@@ -85,7 +85,7 @@ Options include:
 
 ### HA Sidebar
 
-Presence of left sidebar menu:
+Presentation of left sidebar menu:
 - Full (icons + names)
 - Narrow (icons only)
 - None (hidden)
