@@ -121,7 +121,7 @@ done
 #Restore /dev/tty0 and 'ro' mode for /dev if deleted
 if [ -n "$TTY0_DELETED" ]; then
     if ( mknod -m 620 /dev/tty0 c 4 0 &&  mount -o remount,ro /dev ); then
-	bashio::log.info "Restored /dev/tty0 successfully..."
+        bashio::log.info "Restored /dev/tty0 successfully..."
     else
         bashio::log.error "Failed to restore /dev/tty0 and remount /dev/ read only..."
     fi

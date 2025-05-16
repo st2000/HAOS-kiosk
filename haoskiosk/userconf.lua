@@ -41,7 +41,7 @@ local defaults = {
     LOGIN_DELAY = 1,
     ZOOM_LEVEL = 100,
     BROWSER_REFRESH = 600,
-			}
+                        }
 local username = os.getenv("HA_USERNAME") or defaults.HA_USERNAME
 local password = os.getenv("HA_PASSWORD") or defaults.HA_PASSWORD
 
@@ -110,26 +110,26 @@ webview.add_signal("init", function(view)
     -- Listen for page load events
     view:add_signal("load-status", function(v, status)
         if status ~= "finished" then return end  -- Only proceed when the page is fully loaded
-	msg.info("URI: %s", v.uri) -- DEBUG
+        msg.info("URI: %s", v.uri) -- DEBUG
 
         -- We want to start in passthrough mode (i.e. not normal command mode) -- 4 potential options for doing this
-	-- Option#1 Sets passthrough mode for the first window (or all initial windows if using xdotool line)
-	if first_window then
+        -- Option#1 Sets passthrough mode for the first window (or all initial windows if using xdotool line)
+        if first_window then
             -- Option 1a: [USED]
-	    webview.window(v):set_mode("passthrough") -- This method only works  if no pre-existing tabs (e.g., using 'luakit -U')
-	                                              -- Otherwise, first saved (and recovered) tab gets set to passthrough mode and not the specified start url
-	    -- Option 1b: [NOT USED] Requires adding 'apk add xdotool' to Dockerfile -- also seems  to set for all pre-existing windows
+            webview.window(v):set_mode("passthrough") -- This method only works  if no pre-existing tabs (e.g., using 'luakit -U')
+                                                      -- Otherwise, first saved (and recovered) tab gets set to passthrough mode and not the specified start url
+            -- Option 1b: [NOT USED] Requires adding 'apk add xdotool' to Dockerfile -- also seems  to set for all pre-existing windows
 --          os.execute("xdotool key ctrl+z")
---	    msg.info("Setting passthrough mode...") -- DEBUG
-	    first_window = false
-	end
+--          msg.info("Setting passthrough mode...") -- DEBUG
+            first_window = false
+        end
 
 --[[
-	-- Option#2 [NOT USED] Set passthrough mode for all windows with url beginning with 'ha_url'
-	if (v.uri .. "/"):match("^" .. ha_url .. "/") then -- Note ha_url was stripped of trailing slashes
-	    webview.window(v):set_mode("passthrough")
---	    msg.info("Setting passthrough mode...") -- DEBUG
-	end
+        -- Option#2 [NOT USED] Set passthrough mode for all windows with url beginning with 'ha_url'
+        if (v.uri .. "/"):match("^" .. ha_url .. "/") then -- Note ha_url was stripped of trailing slashes
+            webview.window(v):set_mode("passthrough")
+--          msg.info("Setting passthrough mode...") -- DEBUG
+        end
 ]]
 
         -- Set up auto-login for Home Assistant
@@ -154,54 +154,54 @@ webview.add_signal("init", function(view)
         end
 
         -- Set Home Assistant theme and sidebar visibility after dashboard load
-	-- Check if current URL starts with ha_url but not an auth page
+        -- Check if current URL starts with ha_url but not an auth page
         if not ha_settings_applied
-	   and (v.uri .. "/"):match("^" .. ha_url .. "/") -- Note ha_url was stripped of trailing slashes
-	   and not v.uri:match("^" .. ha_url .. "/auth/") then
+           and (v.uri .. "/"):match("^" .. ha_url .. "/") -- Note ha_url was stripped of trailing slashes
+           and not v.uri:match("^" .. ha_url .. "/auth/") then
 
             msg.info("Applying HA settings on dashboard %s: theme=%s, sidebar=%s", v.uri, theme, sidebar) -- DEBUG
 
-	    local js_settings = string.format([[
-    	        try {
-        	    // Set theme and sidebar visibility
-        	    let Theme = '%s';
-        	    let Sidebar = '%s';
+            local js_settings = string.format([[
+                try {
+                    // Set theme and sidebar visibility
+                    let Theme = '%s';
+                    let Sidebar = '%s';
 
-		    let currentTheme = localStorage.getItem('selectedTheme') || '';
-        	    let currentSidebar = localStorage.getItem('dockedSidebar') || '';
-	            let needsReload = false;
+                    let currentTheme = localStorage.getItem('selectedTheme') || '';
+                    let currentSidebar = localStorage.getItem('dockedSidebar') || '';
+                    let needsReload = false;
 
-        	    if (Theme !== currentTheme) {
-            	        needsReload = true;
-        	        if (Theme !== "") { 
-            	            localStorage.setItem('selectedTheme', Theme); 
-        	        } else {
-            	            localStorage.removeItem('selectedTheme'); 
-        	        }
-		    }
+                    if (Theme !== currentTheme) {
+                        needsReload = true;
+                        if (Theme !== "") { 
+                            localStorage.setItem('selectedTheme', Theme); 
+                        } else {
+                            localStorage.removeItem('selectedTheme'); 
+                        }
+                    }
 
-        	    if (Sidebar !== currentSidebar) {
-            	        needsReload = true;	
-        	        if (Sidebar !== "") {
-            	            localStorage.setItem('dockedSidebar', Sidebar); 
-        	        } else {
-            	            localStorage.removeItem('dockedSidebar'); 
-        	        }
-		    }
+                    if (Sidebar !== currentSidebar) {
+                        needsReload = true;     
+                        if (Sidebar !== "") {
+                            localStorage.setItem('dockedSidebar', Sidebar); 
+                        } else {
+                            localStorage.removeItem('dockedSidebar'); 
+                        }
+                    }
 
-//		    localStorage.setItem('DebugLog', "Setting: Theme: " + currentTheme + " -> " + Theme +
-//  				     " ;Sidebar: " + currentSidebar + " -> " + Sidebar + " [Reload: " + needsReload + "]"); // DEBUG
+//                  localStorage.setItem('DebugLog', "Setting: Theme: " + currentTheme + " -> " + Theme +
+//                                   " ;Sidebar: " + currentSidebar + " -> " + Sidebar + " [Reload: " + needsReload + "]"); // DEBUG
 
-		    if(needsReload) { // Reload to apply settings
-        	        setTimeout(function() {
-            	            location.reload();
-        	        }, 500);
-		    }
+                    if (needsReload) { // Reload to apply settings
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    }
 
-		} catch (err) {
-		    localStorage.setItem('DebugLog', "FAILED to set: Theme: " + Theme + " ;Sidebar: " + Sidebar); // DEBUG
-    		}
-	    ]], single_quote_escape(theme), single_quote_escape(sidebar))
+                } catch (err) {
+                    localStorage.setItem('DebugLog', "FAILED to set: Theme: " + Theme + " ;Sidebar: " + Sidebar); // DEBUG
+                }
+            ]], single_quote_escape(theme), single_quote_escape(sidebar))
 
             v:eval_js(js_settings, { source = "ha_settings.js" })
             ha_settings_applied = true
@@ -210,10 +210,10 @@ webview.add_signal("init", function(view)
         -- Set up periodic page refresh if browser_interval is positive
         if browser_refresh > 0 then
             local js_refresh = string.format([[
-    	    	if (window.ha_refresh_id) clearInterval(window.ha_refresh_id);
+                if (window.ha_refresh_id) clearInterval(window.ha_refresh_id);
                 window.ha_refresh_id = setInterval(function() {
-	            location.reload();
-		}, %d);
+                    location.reload();
+                }, %d);
             ]], browser_refresh * 1000)
             v:eval_js(js_refresh, { source = "auto_refresh.js" })  -- Execute the refresh script
         end
@@ -227,7 +227,7 @@ end)
 modes.remove_binds({"passthrough"}, {"<Escape>"})
 modes.add_binds("passthrough", {
     {New_Escape_Key, "Switch to normal mode", function(w)
-    	w:set_prompt()
+        w:set_prompt()
         w:set_mode() -- Use this if not redefining 'default_mode' since defaults to "normal"
 --        w:set_mode("normal") -- Use this if redefining 'default_mode' [Option#3]
      end}
