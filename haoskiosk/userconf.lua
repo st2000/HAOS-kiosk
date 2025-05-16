@@ -1,9 +1,9 @@
 --[[
 Add-on: HAOS Kiosk Display (haoskiosk)
 File: userconf.lua for HA minimal browser run on server
-Version: 0.9.7
+Version: 0.9.8
 Copyright Jeff Kosowsky
-Date: March 2025
+Date: May 2025
 
 Code does the following:
     - Sets browser window to fullscreen
