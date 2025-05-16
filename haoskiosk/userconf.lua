@@ -16,8 +16,8 @@ Code does the following:
     - Prevent printing of '--PASS THROUGH--' status line when in 'passthrough' mode
     - Set up periodic browser refresh every $BROWSWER_REFRESH seconds (disabled if 0)
       NOTE: this is important since console messages overwrite dashboards
-    - Allows for confiurable $ZOOM_LEVEL
-    - Sets Home Assistant theme and sidebar visibility using $THEME and $SIDEBAR environment variables      
+    - Allows for configurable browser $ZOOM_LEVEL
+    - Sets Home Assistant theme and sidebar visibility using $THEME and $SIDEBAR environment variables
 ]]
 
 -- -----------------------------------------------------------------------
