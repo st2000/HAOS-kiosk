@@ -28,7 +28,7 @@ configuration:
       Note: Recommended since on RPi, console messages can overwrite browser
   screen_timeout:
     name: "Screen Timeout"
-    description: "Time in seconds until screen blanks; 0 for never [Default: 600]"
+    description: "Time in seconds until screen blanks; 0 for never [Default: 0]"
   hdmi_port:
     name: "HDMI Port"
     description: |

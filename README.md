@@ -36,48 +36,48 @@ Enter your Home Assistant password.
 
 ### HA URL
 
-Default is: `http://localhost:8123`\
+Default: `http://localhost:8123`\
 In general, you shouldn't need to change this since this is running on the
 local server.
 
 ### HA Dashboard
 
 Name of starting dashboard.\
-Defaults to "" which loads the default `Lovelace` dashboard.
+Default:"" (loads the default `Lovelace` dashboard)
 
 ### Login Delay
 
 Delay in seconds to allow login page to load.\
-Defaults to `1` second.
+Default: 1 second
 
 ### Zoom Level
 
 Level of zoom with `100` being 100%.\
-Default is `100`.
+Default: 100%
 
 ### Browser Refresh
 
 Time between browser refreshes. Set to `0` to disable.\
 Recommended because with the default RPi config, console errors *may*
 overwrite the dashboard.\
-Default is `600` seconds.
+Default: 600 seconds
 
 ### Screen Timeout
 
 Time before screen blanks in seconds. Set to `0` to never timeout.
 
-Default is `600` seconds.
+Default: 0 seconds (never timeout)
 
 ### HDMI Port
 
-HDMI output port. Technically can be `0` or `1` (Defaults to `0`).\
+HDMI output port. Technically can be `0` or `1` (Default: 0).\
 BUT currently has no effect on stock HAOS on RPi since configured to mirror
 HDMI0 onto HDMI1.
 
 ### HA Theme
 
 Theme used by HA frontend (device-specific).\
-Options include:
+Options include: (Default: Dark)
 
 - Auto
 - Dark
@@ -87,7 +87,7 @@ Options include:
 ### HA Sidebar
 
 Presentation of left sidebar menu (device-specific).\
-Options include:
+Options include: (Default: None)
 
 - Full (icons + names)
 - Narrow (icons only)

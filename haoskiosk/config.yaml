@@ -34,7 +34,7 @@ options:
   login_delay: 1.0
   zoom_level: 100
   browser_refresh: 600
-  screen_timeout: 600
+  screen_timeout: 0
   hdmi_port: 0
   ha_theme: "dark"
   ha_sidebar: "none"
