@@ -1,4 +1,27 @@
-uired Luakit modules
+--[[
+Add-on: HAOS Kiosk Display (haoskiosk)
+File: userconf.lua for HA minimal browser run on server
+Version: 0.9.7
+Copyright Jeff Kosowsky
+Date: March 2025
+
+Code does the following:
+    - Sets browser window to fullscreen
+    - Sets zooms level to value of $ZOOM_LEVEL (default 100%)
+    - Starts first window in 'passthrough' mode so that you can type text as needed without
+       triggering browser commands
+    - Auto-logs in to Home Assistant using $HA_USERNAME and $HA_PASSWORD
+    - Redefines key to return to normal mode (used for commands) from 'passthrough' mode to: 'Ctl-Alt-Esc'
+      (rather than just 'Esc') to prevent unintended  returns to normal mode and activation of unwanted commands
+    - Prevent printing of '--PASS THROUGH--' status line when in 'passthrough' mode
+    - Set up periodic browser refresh every $BROWSWER_REFRESH seconds (disabled if 0)
+      NOTE: this is important since console messages overwrite dashboards
+    - Allows for confiurable $ZOOM_LEVEL
+    - Sets Home Assistant theme and sidebar visibility using $THEME and $SIDEBAR environment variables      
+]]
+
+-- -----------------------------------------------------------------------
+-- Load required Luakit modules
 local window = require "window"
 local webview = require "webview"
 local settings = require "settings"
@@ -29,6 +52,8 @@ if not ha_url:match("^https?://[%w%.%-%%:]+[/%?%#]?[/%w%.%-%?%#%=%%]*$") then
     ha_url = defaults.HA_URL
 end
 ha_url = string.gsub(ha_url, "/+$", "") -- Strip trailing '/'
+local ha_url_base = ha_url:match("^(https?://[%w%.%-%%:]+)") or ha_url
+ha_url_base = string.gsub(ha_url_base, "/+$", "") -- Strip trailing '/'
 
 local raw_theme = os.getenv("HA_THEME") or defaults.HA_THEME -- Valid entries: auto, dark, light, none (or "")
 local valid_themes = { auto = '{}', dark = '{"dark":true}', light = '{"dark":false}', none = '', [""] = ''}
@@ -104,7 +129,7 @@ webview.add_signal("init", function(view)
 
 --[[
         -- Option#2 [NOT USED] Set passthrough mode for all windows with url beginning with 'ha_url'
-        if (v.uri .. "/"):match("^" .. ha_url .. "/") then -- Note ha_url was stripped of trailing slashes
+        if (v.uri .. "/"):match("^" .. ha_url_base .. "/") then -- Note ha_url was stripped of trailing slashes
             webview.window(v):set_mode("passthrough")
 --          msg.info("Setting passthrough mode...") -- DEBUG
         end
@@ -112,7 +137,7 @@ webview.add_signal("init", function(view)
 
         -- Set up auto-login for Home Assistant
         -- Check if current URL matches the Home Assistant auth page
-        if v.uri:match("^" .. ha_url .. "/auth/authorize%?response_type=code") then
+        if v.uri:match("^" .. ha_url_base .. "/auth/authorize%?response_type=code") then
             -- JavaScript to auto-fill and submit the login form
             local js_auto_login = string.format([[
                 setTimeout(function() {
@@ -134,8 +159,8 @@ webview.add_signal("init", function(view)
         -- Set Home Assistant theme and sidebar visibility after dashboard load
         -- Check if current URL starts with ha_url but not an auth page
         if not ha_settings_applied
-           and (v.uri .. "/"):match("^" .. ha_url .. "/") -- Note ha_url was stripped of trailing slashes
-           and not v.uri:match("^" .. ha_url .. "/auth/") then
+           and (v.uri .. "/"):match("^" .. ha_url_base .. "/") -- Note ha_url was stripped of trailing slashes
+           and not v.uri:match("^" .. ha_url_base .. "/auth/") then
 
             msg.info("Applying HA settings on dashboard %s: theme=%s, sidebar=%s", v.uri, theme, sidebar) -- DEBUG
 
@@ -192,6 +217,9 @@ webview.add_signal("init", function(view)
                 window.ha_refresh_id = setInterval(function() {
                     location.reload();
                 }, %d);
+                window.addEventListener('beforeunload', function() {
+                    clearInterval(window.ha_refresh_id);
+                });
             ]], browser_refresh * 1000)
             v:eval_js(js_refresh, { source = "auto_refresh.js" })  -- Execute the refresh script
         end
