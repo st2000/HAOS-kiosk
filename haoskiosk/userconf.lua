@@ -1,26 +1,4 @@
---[[
-Add-on: HAOS Kiosk Display (haoskiosk)
-File: userconf.lua for HA minimal browser run on server
-Version: 0.9.8
-Copyright Jeff Kosowsky
-Date: April 2025
-
-Code does the following:
-    - Sets browser window to fullscreen
-   - Sets zooms level to value of $ZOOM_LEVEL (default 100%)
-    - Starts first window in 'passthrough' mode so that you can type text as needed without
-      triggering browser commands
-    - Auto-logs in to Home Assistant using $HA_USERNAME and $HA_PASSWORD
-    - Redefines key to return to normal mode (used for commands) from 'passthrough' mode to: 'Ctl-Alt-Esc' (configurable)
-      (rather than just 'Esc') to prevent unintended  returns to normal mode and activation of unwanted commands
-    - Prevent printing of '--PASS THROUGH--' status line when in 'passthrough' mode
-    - Set up periodic browser refresh every $BROWSWER_REFRESH seconds (disabled if 0)
-      NOTE: this is important since console messages overwrite dashboards
-    - Sets Home Assistant theme and sidebar visibility using $THEME and $SIDEBAR environment variables      
-]]
-
--- -----------------------------------------------------------------------
--- Load required Luakit modules
+uired Luakit modules
 local window = require "window"
 local webview = require "webview"
 local settings = require "settings"
@@ -173,19 +151,19 @@ webview.add_signal("init", function(view)
 
                     if (Theme !== currentTheme) {
                         needsReload = true;
-                        if (Theme !== "") { 
-                            localStorage.setItem('selectedTheme', Theme); 
+                        if (Theme !== "") {
+                            localStorage.setItem('selectedTheme', Theme);
                         } else {
-                            localStorage.removeItem('selectedTheme'); 
+                            localStorage.removeItem('selectedTheme');
                         }
                     }
 
                     if (Sidebar !== currentSidebar) {
-                        needsReload = true;     
+                        needsReload = true;
                         if (Sidebar !== "") {
-                            localStorage.setItem('dockedSidebar', Sidebar); 
+                            localStorage.setItem('dockedSidebar', Sidebar);
                         } else {
-                            localStorage.removeItem('dockedSidebar'); 
+                            localStorage.removeItem('dockedSidebar');
                         }
                     }
 
