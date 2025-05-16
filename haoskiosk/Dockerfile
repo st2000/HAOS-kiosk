@@ -1,9 +1,9 @@
 ################################################################################
 # Add-on: HAOS Kiosk Display (haoskiosk)
 # File: Dockerfile
-# Version: 0.9.7
+# Version: 0.9.8
 # Copyright Jeff Kosowsky
-# Date: April 2025
+# Date: May 2025
 ################################################################################
 
 ARG BUILD_FROM
@@ -29,6 +29,7 @@ ENV DBUS_SESSION_BUS_ADDRESS="unix:path=/tmp/dbus-session"
 # Copy over 'xorg.conf' and lua 'userconf.lua' file
 COPY xorg.conf /etc/X11/xorg.conf
 COPY userconf.lua /root/.config/luakit/userconf.lua
+COPY translations/*.yaml /translations/
 
 COPY run.sh /
 RUN chmod a+x /run.sh

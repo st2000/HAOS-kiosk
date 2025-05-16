@@ -50,17 +50,10 @@ Defaults to "" which loads the default `Lovelace` dashboard.
 Delay in seconds to allow login page to load.\
 Defaults to `1` second.
 
-### HDMI Port
+### Zoom Level
 
-HDMI output port. Technically can be `0` or `1` (Defaults to `0`).\
-BUT currently has no effect on stock HAOS on RPi since configured to mirror
-HDMI0 onto HDMI1.
-
-### Screen Timeout
-
-Time before screen blanks in seconds. Set to `0` to never timeout.\\
-
-Default is `600` seconds.
+Level of zoom with `100` being 100%.\
+Default is `100`.
 
 ### Browser Refresh
 
@@ -69,7 +62,30 @@ Recommended because with the default RPi config, console errors *may*
 overwrite the dashboard.\
 Default is `600` seconds.
 
-### Zoom Level
+### Screen Timeout
 
-Level of zoom with `100` being 100%.\
-Default is `100`.
+Time before screen blanks in seconds. Set to `0` to never timeout.
+
+Default is `600` seconds.
+
+### HDMI Port
+
+HDMI output port. Technically can be `0` or `1` (Defaults to `0`).\
+BUT currently has no effect on stock HAOS on RPi since configured to mirror
+HDMI0 onto HDMI1.
+
+### HA Theme
+
+Theme used by HA frontend (device-specific).\
+Options include:
+- Auto
+- Dark
+- Light
+- None
+
+### HA Sidebar
+
+Presence of left sidebar menu:
+- Full (icons + names)
+- Narrow (icons only)
+- None (hidden)

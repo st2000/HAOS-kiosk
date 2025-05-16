@@ -6,9 +6,9 @@ trap '[ -n "$(jobs -p)" ] && kill $(jobs -p); [ -n "$TTY0_DELETED" ] && mknod -m
 ################################################################################
 # Add-on: HAOS Kiosk Display (haoskiosk)
 # File: run.sh
-# Version: 0.9.7
+# Version: 0.9.8
 # Copyright Jeff Kosowsky
-# Date: April 2025
+# Date: May 2025
 #
 #  Code does the following:
 #     - Import and sanity-check the following variables from HA/config.yaml
@@ -16,6 +16,8 @@ trap '[ -n "$(jobs -p)" ] && kill $(jobs -p); [ -n "$TTY0_DELETED" ] && mknod -m
 #         HA_PASSWORD
 #         HA_URL
 #         HA_DASHBOARD
+#         HA_THEME
+#         HA_SIDEBAR
 #         LOGIN_DELAY
 #         ZOOM_LEVEL
 #         BROWSER_REFRESH
@@ -31,39 +33,40 @@ trap '[ -n "$(jobs -p)" ] && kill $(jobs -p); [ -n "$TTY0_DELETED" ] && mknod -m
 bashio::log.info "Starting haoskiosk..."
 ### Get config variables from HA add-on & set environment variables
 HA_USERNAME=$(bashio::config 'ha_username')
-HA_USERNAME="${HA_USERNAME//null/}"
+HA_USERNAME="${HA_USERNAME/null/}"
 
 HA_PASSWORD=$(bashio::config 'ha_password')
-HA_PASSWORD="${HA_PASSWORD//null/}"
+HA_PASSWORD="${HA_PASSWORD/null/}"
 
 HA_URL=$(bashio::config 'ha_url')
-HA_URL="${HA_URL//null/}"
-HA_URL="${HA_URL:-http://localhost:8123}"
-HA_URL="${HA_URL%%/}" #Strip trailing slash
+HA_URL="${HA_URL/null/}"
 
 HA_DASHBOARD=$(bashio::config 'ha_dashboard')
-HA_DASHBOARD="${HA_DASHBOARD//null/}"
+HA_DASHBOARD="${HA_DASHBOARD/null/}"
+
+HA_THEME=$(bashio::config 'ha_theme')
+HA_THEME="${HA_THEME/null/}"
+
+HA_SIDEBAR=$(bashio::config 'ha_sidebar')
+HA_SIDEBAR="${HA_SIDEBAR/null/}"
 
 LOGIN_DELAY=$(bashio::config 'login_delay')
-LOGIN_DELAY="${LOGIN_DELAY//null/}"
-LOGIN_DELAY="${LOGIN_DELAY:-2}"
+LOGIN_DELAY="${LOGIN_DELAY/null/}"
 
 ZOOM_LEVEL=$(bashio::config 'zoom_level')
-ZOOM_LEVEL="${ZOOM_LEVEL//null/}"
-ZOOM_LEVEL="${ZOOM_LEVEL:-100}"
+ZOOM_LEVEL="${ZOOM_LEVEL/null/}"
 
 BROWSER_REFRESH=$(bashio::config 'browser_refresh')
-BROWSER_REFRESH="${BROWSER_REFRESH//null/}"
-BROWSER_REFRESH="${BROWSER_REFRESH:-600}" #Default to 600 seconds
+BROWSER_REFRESH="${BROWSER_REFRESH/null/}"
 
-export HA_USERNAME HA_PASSWORD HA_URL HA_DASHBOARD LOGIN_DELAY ZOOM_LEVEL BROWSER_REFRESH #Referenced in 'userconfig.lua'
+export HA_USERNAME HA_PASSWORD HA_URL HA_DASHBOARD HA_THEME HA_SIDEBAR LOGIN_DELAY ZOOM_LEVEL BROWSER_REFRESH #Referenced in 'userconfig.lua'
 
 SCREEN_TIMEOUT=$(bashio::config 'screen_timeout')
-SCREEN_TIMEOUT="${SCREEN_TIMEOUT//null/}"
+SCREEN_TIMEOUT="${SCREEN_TIMEOUT/null/}"
 SCREEN_TIMEOUT="${SCREEN_TIMEOUT:-600}" #Default to 600 seconds
 
 HDMI_PORT=$(bashio::config 'hdmi_port')
-HDMI_PORT="${HDMI_PORT//null/}"
+HDMI_PORT="${HDMI_PORT/null/}"
 HDMI_PORT="${HDMI_PORT:-0}"
 #NOTE: For now, both HDMI ports are mirrored and there is only /dev/fb0
 #      Not sure how to get them unmirrored so that console can be on /dev/fb0 and X on /dev/fb1
@@ -74,6 +77,9 @@ if [ -z "$HA_USERNAME" ] || [ -z "$HA_PASSWORD" ]; then
     bashio::log.error "Error: HA_USERNAME and HA_PASSWORD must be set"
     exit 1
 fi
+
+bashio::log.info "HA_USERNAME=$HA_USERNAME HA_PASSWORD=XXXXX HA_URL=$HA_URL HA_DASHBOARD=$HA_DASHBOARD HA_THEME=$HA_THEME HA_SIDEBAR=$HA_SIDEBAR"
+bashio::log.info "LOGIN_DELAY=$LOGIN_DELAY ZOOM_LEVEL=$ZOOM_LEVEL BROWSER_REFRESH=$BROWSER_REFRESH SCREEN_TIMEOUT=$SCREEN_TIMEOUT HDMI_PORT=$HDMI_PORT"
 
 ################################################################################
 ### Start D-Bus session in the background (otherwise luakit hangs for 5 minutes before starting)
@@ -115,7 +121,7 @@ done
 #Restore /dev/tty0 and 'ro' mode for /dev if deleted
 if [ -n "$TTY0_DELETED" ]; then
     if ( mknod -m 620 /dev/tty0 c 4 0 &&  mount -o remount,ro /dev ); then
-        bashio::log.info "Restored /dev/tty0 successfully..."
+	bashio::log.info "Restored /dev/tty0 successfully..."
     else
         bashio::log.error "Failed to restore /dev/tty0 and remount /dev/ read only..."
     fi
@@ -153,6 +159,7 @@ else
     bashio::log.info "Screen timeout after $SCREEN_TIMEOUT seconds..."
 fi
 
+#exec sleep 100000 #DEBUG
 ### Run Luakit in the foreground
 bashio::log.info "Launching Luakit browser..."
 exec luakit -U "$HA_URL/$HA_DASHBOARD"
