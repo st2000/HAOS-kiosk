@@ -27,6 +27,7 @@ trap '[ -n "$(jobs -p)" ] && kill $(jobs -p); [ -n "$TTY0_DELETED" ] && mknod -m
 #     - Start X window system
 #     - Start Openbox window manager
 #     - Start Dbus session
+#     - Poll to check if monitor wakes up and if so, reload luakit browser
 #     - Launch fresh Luakit browser for url: $HA_URL/$HA_DASHBOARD
 #
 ################################################################################
@@ -160,15 +161,17 @@ else
 fi
 
 # Poll to send <Control-r> when screen unblanks to force reload of luakit page
-( PREV=""
-  while true; do
-      if pgrep luakit > /dev/null; then
-          STATE=$(xset -q | awk '/Monitor is/ {print $3}')
-          [[ "$PREV" == "Off" && "$STATE" == "On" ]] && xdotool key --clearmodifiers ctrl+r
-          PREV=$STATE
-      fi
-      sleep 1
-  done )&
+(
+    PREV=""
+    while true; do
+        if pgrep luakit > /dev/null; then
+            STATE=$(xset -q | awk '/Monitor is/ {print $3}')
+            [[ "$PREV" == "Off" && "$STATE" == "On" ]] && xdotool key --clearmodifiers ctrl+r
+            PREV=$STATE
+        fi
+        sleep 1
+    done
+)&
 
 #luakit -U "$HA_URL/$HA_DASHBOARD" #DEBUG
 #exec sleep 100000 #DEBUG

@@ -4,7 +4,7 @@
 
 - Added ability to set browser theme and sidebar behavior
 - Added <Control-r> binding to reload browser screen
-- Refresh screen automatically when returning from screen blank
+- Reload browser screen automatically when returning from screen blank
 - Improved input validation and error handling
 - Tightened up code
 - Updated documentation
