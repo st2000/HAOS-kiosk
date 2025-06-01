@@ -8,7 +8,7 @@ trap '[ -n "$(jobs -p)" ] && kill $(jobs -p); [ -n "$TTY0_DELETED" ] && mknod -m
 # File: run.sh
 # Version: 0.9.8
 # Copyright Jeff Kosowsky
-# Date: May 2025
+# Date: June 2025
 #
 #  Code does the following:
 #     - Import and sanity-check the following variables from HA/config.yaml
@@ -159,6 +159,18 @@ else
     bashio::log.info "Screen timeout after $SCREEN_TIMEOUT seconds..."
 fi
 
+# Poll to send <Control-r> when screen unblanks to force reload of luakit page
+( PREV=""
+  while true; do
+      if pgrep luakit > /dev/null; then
+          STATE=$(xset -q | awk '/Monitor is/ {print $3}')
+          [[ "$PREV" == "Off" && "$STATE" == "On" ]] && xdotool key --clearmodifiers ctrl+r
+          PREV=$STATE
+      fi
+      sleep 1
+  done )&
+
+#luakit -U "$HA_URL/$HA_DASHBOARD" #DEBUG
 #exec sleep 100000 #DEBUG
 ### Run Luakit in the foreground
 bashio::log.info "Launching Luakit browser..."

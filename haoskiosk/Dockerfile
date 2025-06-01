@@ -3,7 +3,7 @@
 # File: Dockerfile
 # Version: 0.9.8
 # Copyright Jeff Kosowsky
-# Date: May 2025
+# Date: June 2025
 ################################################################################
 
 ARG BUILD_FROM
@@ -19,6 +19,7 @@ RUN apk update && apk add --no-cache \
     ttf-dejavu \
     util-linux \
     xset \
+    xdotool \
     bash \
     && rm -rf /var/cache/apk/*
 

@@ -3,7 +3,7 @@ Add-on: HAOS Kiosk Display (haoskiosk)
 File: userconf.lua for HA minimal browser run on server
 Version: 0.9.8
 Copyright Jeff Kosowsky
-Date: May 2025
+Date: June 2025
 
 Code does the following:
     - Sets browser window to fullscreen
@@ -13,6 +13,7 @@ Code does the following:
     - Auto-logs in to Home Assistant using $HA_USERNAME and $HA_PASSWORD
     - Redefines key to return to normal mode (used for commands) from 'passthrough' mode to: 'Ctl-Alt-Esc'
       (rather than just 'Esc') to prevent unintended  returns to normal mode and activation of unwanted commands
+    - Adds <Control-r> binding to reload browser screen (all modes)
     - Prevent printing of '--PASS THROUGH--' status line when in 'passthrough' mode
     - Set up periodic browser refresh every $BROWSWER_REFRESH seconds (disabled if 0)
       NOTE: this is important since console messages overwrite dashboards
@@ -237,7 +238,12 @@ modes.add_binds("passthrough", {
         w:set_mode() -- Use this if not redefining 'default_mode' since defaults to "normal"
 --        w:set_mode("normal") -- Use this if redefining 'default_mode' [Option#3]
      end}
-})
+}
+)
+-- Add <Control-r> binding in all modes to reload page
+modes.add_binds("all", {
+    { "<Control-r>", "reload page", function (w) w:reload() end },
+    })
 
 -- Clear the command line when entering passthrough instead of typing '-- PASS THROUGH --'
 modes.get_modes()["passthrough"].enter = function(w)
