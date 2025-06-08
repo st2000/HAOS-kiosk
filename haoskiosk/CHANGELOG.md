@@ -6,6 +6,8 @@
 - Added <Control-r> binding to reload browser screen
 - Reload browser screen automatically when returning from screen blank
 - Improved input validation and error handling
+- Removed host dbus dependency
+- Added: ingress: true
 - Tightened up code
 - Updated documentation
 

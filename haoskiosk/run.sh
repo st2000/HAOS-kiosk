@@ -26,7 +26,6 @@ trap '[ -n "$(jobs -p)" ] && kill $(jobs -p); [ -n "$TTY0_DELETED" ] && mknod -m
 #     - Hack to delete (and later restore) /dev/tty0 (needed for X to start)
 #     - Start X window system
 #     - Start Openbox window manager
-#     - Start Dbus session
 #     - Poll to check if monitor wakes up and if so, reload luakit browser
 #     - Launch fresh Luakit browser for url: $HA_URL/$HA_DASHBOARD
 #
@@ -83,8 +82,8 @@ bashio::log.info "HA_USERNAME=$HA_USERNAME HA_PASSWORD=XXXXX HA_URL=$HA_URL HA_D
 bashio::log.info "LOGIN_DELAY=$LOGIN_DELAY ZOOM_LEVEL=$ZOOM_LEVEL BROWSER_REFRESH=$BROWSER_REFRESH SCREEN_TIMEOUT=$SCREEN_TIMEOUT HDMI_PORT=$HDMI_PORT"
 
 ################################################################################
-### Start D-Bus session in the background (otherwise luakit hangs for 5 minutes before starting)
-dbus-daemon --session --address="$DBUS_SESSION_BUS_ADDRESS" &
+### Avoid waiting for DBUS timeouts (e.g., luakit)
+export DBUS_SESSION_BUS_ADDRESS=/dev/null
 
 ### Start Xorg in the background
 rm -rf /tmp/.X*-lock #Cleanup old versions

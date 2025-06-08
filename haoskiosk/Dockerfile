@@ -23,9 +23,8 @@ RUN apk update && apk add --no-cache \
     bash \
     && rm -rf /var/cache/apk/*
 
-# Set the display and dbus environment variables
+# Set the display variable
 ENV DISPLAY=:0
-ENV DBUS_SESSION_BUS_ADDRESS="unix:path=/tmp/dbus-session"
 
 # Copy over 'xorg.conf' and lua 'userconf.lua' file
 COPY xorg.conf /etc/X11/xorg.conf

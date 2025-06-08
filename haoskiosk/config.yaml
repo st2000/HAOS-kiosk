@@ -13,8 +13,8 @@ arch:
 
 startup: application
 host_network: true
-host_dbus: true
 init: false
+ingress: true
 
 devices:
   - /dev/fb0
@@ -24,9 +24,6 @@ devices:
 
 privileged:
   - SYS_ADMIN
-
-security_opt:
-  - apparmor:unconfined
 
 options:
   ha_url: "http://localhost:8123"
