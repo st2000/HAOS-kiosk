@@ -163,7 +163,7 @@ webview.add_signal("init", function(view)
                             username: !!usernameField,
                             password: !!passwordField,
                             submit: !!submitButton
-                        });			
+			});			
 		    }
 
 		    if (haCheckbox) {
@@ -227,7 +227,6 @@ webview.add_signal("init", function(view)
                     } else if (needsDispatch) { // Dispatch is good enough for Theme
     		        window.dispatchEvent(new CustomEvent('settheme', { detail: { theme } }));
 		    }
-
 
                 } catch (err) {
 		    console.error(err);
