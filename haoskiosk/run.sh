@@ -43,18 +43,18 @@ function get_config () {
 
     local VALUE="${!VAR_NAME:-}" #Existing value for variable if set (note need default since running as 'nounset')
     if [ -z "$VALUE" ]; then
-	VALUE=$(bashio::config "${VAR_NAME,,}")
+    	VALUE=$(bashio::config "${VAR_NAME,,}")
     fi
     if [ "$VALUE" = "null" ] || [ "$VALUE" = "" ]; then
-	VALUE="$DEFAULT"
+    	VALUE="$DEFAULT"
     fi
 
     export "$VAR_NAME=$VALUE"
 
     if [ -z "$MASK" ]; then
-	bashio::log.info "$VAR_NAME=$VALUE"
+    	bashio::log.info "$VAR_NAME=$VALUE"
     else
-	bashio::log.info "$VAR_NAME=XXXXXX"
+    	bashio::log.info "$VAR_NAME=XXXXXX"
     fi
 }
 
