@@ -100,7 +100,7 @@ if [ -e "/dev/tty0" ]; then
         bashio::log.error "Failed to remount /dev as read-write..."
         exit 1
     fi
-    if  ! rm /dev/tty0 ; then
+    if  ! rm -f /dev/tty0 ; then
         bashio::log.error "Failed to delete /dev/tty0..."
         exit 1
     fi
