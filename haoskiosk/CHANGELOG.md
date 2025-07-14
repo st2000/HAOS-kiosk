@@ -1,6 +1,7 @@
 # Changelog
 
 ## v0.9.9 - July 2025
+
 - Removed remounting of /dev/ ro (which caused HAOS updates to fail)
 - Added 'debug' config that stops add-on before launching luakit
 - Cleaned up/improved code in run.sh and userconf.lua

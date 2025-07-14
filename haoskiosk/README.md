@@ -97,6 +97,6 @@ Options include: (Default: None)
 
 For debugging purposes, launches `Xorg` and `openbox` and then sleeps
 without launching `luakit`.\
-Manually, launch `luakit` (e.g., 
+Manually, launch `luakit` (e.g.,
 `luakit -U localhost:8123/<your-dashboard>`) from Docker container.\
 E.g., `sudo docker exec -it addon_haoskiosk bash`

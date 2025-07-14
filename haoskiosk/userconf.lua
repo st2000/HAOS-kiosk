@@ -106,7 +106,7 @@ local function single_quote_escape(str) -- Single quote strings before injection
     str = str:gsub("\\", "\\\\")
     str = str:gsub("'", "\\'")
     str = str:gsub("\n", "\\n")
-    str = str:gsub("\r", "\\r")    
+    str = str:gsub("\r", "\\r")
     return str
 end
 
@@ -163,7 +163,7 @@ webview.add_signal("init", function(view)
                             username: !!usernameField,
                             password: !!passwordField,
                             submit: !!submitButton
-			});			
+			});
 		    }
 
 		    if (haCheckbox) {
@@ -230,7 +230,7 @@ webview.add_signal("init", function(view)
 
                 } catch (err) {
 		    console.error(err);
-		    console.log("FAILED to set: Theme: " + theme + " ;Sidebar: " + sidebar + "[" + err + "]"); // DEBUG		
+		    console.log("FAILED to set: Theme: " + theme + " ;Sidebar: " + sidebar + "[" + err + "]"); // DEBUG
                     localStorage.setItem('DebugLog', "FAILED to set: Theme: " + theme + " ;Sidebar: " + sidebar); // DEBUG
                 }
             ]], single_quote_escape(theme), single_quote_escape(sidebar))
