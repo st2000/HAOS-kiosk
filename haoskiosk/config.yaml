@@ -35,7 +35,7 @@ options:
   hdmi_port: 0
   ha_theme: "dark"
   ha_sidebar: "none"
-  debug_mode: true
+  debug_mode: false
 
 schema:
   ha_username: str
