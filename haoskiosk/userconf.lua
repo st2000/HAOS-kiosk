@@ -1,9 +1,9 @@
 --[[
 Add-on: HAOS Kiosk Display (haoskiosk)
 File: userconf.lua for HA minimal browser run on server
-Version: 0.9.8
+Version: 0.9.9
 Copyright Jeff Kosowsky
-Date: June 2025
+Date: July 2025
 
 Code does the following:
     - Sets browser window to fullscreen
@@ -30,7 +30,7 @@ local modes = package.loaded["modes"]
 
 -- -----------------------------------------------------------------------
 -- Configurable variables
-local New_Escape_Key = "<Control-Mod1-Escape>" -- Ctl-Alt-Esc
+local new_escape_key = "<Control-Mod1-Escape>" -- Ctl-Alt-Esc
 
 -- Load in environment variables to configure options
 local defaults = {
@@ -103,14 +103,20 @@ settings.webview.zoom_level = zoom_level
 -- Helper functions
 local function single_quote_escape(str) -- Single quote strings before injection into JS
     if not str or str == "" then return str end
+    str = str:gsub("\\", "\\\\")
     str = str:gsub("'", "\\'")
+    str = str:gsub("\n", "\\n")
+    str = str:gsub("\r", "\\r")
     return str
 end
 
 -- -----------------------------------------------------------------------
 local first_window = true
-local ha_settings_applied = false -- Flag to track if HA settings have already been applied in this session
+local ha_settings_applied = setmetatable({}, { __mode = "k" }) -- Flag to track if HA settings have already been applied in this session
+
 webview.add_signal("init", function(view)
+    ha_settings_applied[view] = false  -- Set per view
+
     -- Listen for page load events
     view:add_signal("load-status", function(v, status)
         if status ~= "finished" then return end  -- Only proceed when the page is fully loaded
@@ -142,16 +148,31 @@ webview.add_signal("init", function(view)
             -- JavaScript to auto-fill and submit the login form
             local js_auto_login = string.format([[
                 setTimeout(function() {
-                    var usernameField = document.querySelector('input[name="username"]');
-                    var passwordField = document.querySelector('input[name="password"]');
-                    var submitButton = document.querySelector('mwc-button');
+		    const usernameField = document.querySelector('input[autocomplete="username"]');
+		    const passwordField = document.querySelector('input[autocomplete="current-password"]');
+		    const haCheckbox = document.querySelector('ha-checkbox');
+		    const submitButton = document.querySelector('mwc-button');
+
                     if (usernameField && passwordField && submitButton) {
                         usernameField.value = '%s';
                         usernameField.dispatchEvent(new Event('input', { bubbles: true }));
                         passwordField.value = '%s';
                         passwordField.dispatchEvent(new Event('input', { bubbles: true }));
-                        submitButton.click();
-                    }
+                    } else {
+                        console.log('Auto-login failed: missing elements', {
+                            username: !!usernameField,
+                            password: !!passwordField,
+                            submit: !!submitButton
+			});
+		    }
+
+		    if (haCheckbox) {
+		        haCheckbox.setAttribute('checked', '');
+			haCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+		    }
+
+                    submitButton.click();
+
                 }, %d);
             ]], single_quote_escape(username), single_quote_escape(password), login_delay * 1000)
             v:eval_js(js_auto_login, { source = "auto_login.js" })  -- Execute the login script
@@ -159,7 +180,7 @@ webview.add_signal("init", function(view)
 
         -- Set Home Assistant theme and sidebar visibility after dashboard load
         -- Check if current URL starts with ha_url but not an auth page
-        if not ha_settings_applied
+        if not ha_settings_applied[v]
            and (v.uri .. "/"):match("^" .. ha_url_base .. "/") -- Note ha_url was stripped of trailing slashes
            and not v.uri:match("^" .. ha_url_base .. "/auth/") then
 
@@ -168,47 +189,54 @@ webview.add_signal("init", function(view)
             local js_settings = string.format([[
                 try {
                     // Set theme and sidebar visibility
-                    let Theme = '%s';
-                    let Sidebar = '%s';
+		    const theme = '%s';
+		    const sidebar = '%s';
 
-                    let currentTheme = localStorage.getItem('selectedTheme') || '';
-                    let currentSidebar = localStorage.getItem('dockedSidebar') || '';
+                    const currentTheme = localStorage.getItem('selectedTheme') || '';
+                    const currentSidebar = localStorage.getItem('dockedSidebar') || '';
+
+		    let needsDispatch = false;
                     let needsReload = false;
 
-                    if (Theme !== currentTheme) {
-                        needsReload = true;
-                        if (Theme !== "") {
-                            localStorage.setItem('selectedTheme', Theme);
+                    if (theme !== currentTheme) {
+                        needsDispatch = true;
+                        if (theme !== "") {
+                            localStorage.setItem('selectedTheme', theme);
                         } else {
                             localStorage.removeItem('selectedTheme');
                         }
                     }
 
-                    if (Sidebar !== currentSidebar) {
-                        needsReload = true;
-                        if (Sidebar !== "") {
-                            localStorage.setItem('dockedSidebar', Sidebar);
+                    if (sidebar !== currentSidebar) {
+//                        needsReload = true;
+                        if (sidebar !== "") {
+                            localStorage.setItem('dockedSidebar', sidebar);
                         } else {
                             localStorage.removeItem('dockedSidebar');
                         }
                     }
 
-//                  localStorage.setItem('DebugLog', "Setting: Theme: " + currentTheme + " -> " + Theme +
-//                                   " ;Sidebar: " + currentSidebar + " -> " + Sidebar + " [Reload: " + needsReload + "]"); // DEBUG
+//                  localStorage.setItem('DebugLog', "Setting: Theme: " + currentTheme + " -> " + theme +
+//                                   " ;Sidebar: " + currentSidebar + " -> " + sidebar + " [Reload: " + needsReload + "]"); // DEBUG
 
-                    if (needsReload) { // Reload to apply settings
+
+                    if (needsReload) { // Reload to apply Sidebar (+/ Theme) settings (Dispatch won't work)
                         setTimeout(function() {
                             location.reload();
                         }, 500);
-                    }
+                    } else if (needsDispatch) { // Dispatch is good enough for Theme
+    		        window.dispatchEvent(new CustomEvent('settheme', { detail: { theme } }));
+		    }
 
                 } catch (err) {
-                    localStorage.setItem('DebugLog', "FAILED to set: Theme: " + Theme + " ;Sidebar: " + Sidebar); // DEBUG
+		    console.error(err);
+		    console.log("FAILED to set: Theme: " + theme + " ;Sidebar: " + sidebar + "[" + err + "]"); // DEBUG
+                    localStorage.setItem('DebugLog', "FAILED to set: Theme: " + theme + " ;Sidebar: " + sidebar); // DEBUG
                 }
             ]], single_quote_escape(theme), single_quote_escape(sidebar))
 
             v:eval_js(js_settings, { source = "ha_settings.js" })
-            ha_settings_applied = true
+            ha_settings_applied[v] = true   -- Mark in Lua session as settings applied
         end
 
         -- Set up periodic page refresh if browser_interval is positive
@@ -230,10 +258,10 @@ end)
 
 
 -- -----------------------------------------------------------------------
--- Redefine <Esc> to 'New_Escape_Key' (e.g., <Ctl-Alt-Esc>) to exit current mode and enter normal mode
+-- Redefine <Esc> to 'new_escape_key' (e.g., <Ctl-Alt-Esc>) to exit current mode and enter normal mode
 modes.remove_binds({"passthrough"}, {"<Escape>"})
 modes.add_binds("passthrough", {
-    {New_Escape_Key, "Switch to normal mode", function(w)
+    {new_escape_key, "Switch to normal mode", function(w)
         w:set_prompt()
         w:set_mode() -- Use this if not redefining 'default_mode' since defaults to "normal"
 --        w:set_mode("normal") -- Use this if redefining 'default_mode' [Option#3]

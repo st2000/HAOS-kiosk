@@ -49,3 +49,8 @@ configuration:
       full: "Full"
       narrow: "Narrow"
       none: "None"
+  debug_mode:
+    name: "Debug Mode"
+    description: |
+      Launch X and Openbox but not Luakit browser.
+      Manually access using: sudo docker -exec -it addon_haoskiosk bash
