@@ -27,7 +27,8 @@ privileged:
 
 options:
   ha_url: "http://localhost:8123"
-  ha_dashboard: ""
+  ha_dashboard_000: ""
+  ha_dashboard_001: ""
   login_delay: 1.0
   zoom_level: 100
   browser_refresh: 600
@@ -41,7 +42,8 @@ schema:
   ha_username: str
   ha_password: password
   ha_url: str
-  ha_dashboard: str?
+  ha_dashboard_000: str?
+  ha_dashboard_001: str?
   login_delay: float(0,)
   zoom_level: int(10,1000)
   browser_refresh: int(0,)

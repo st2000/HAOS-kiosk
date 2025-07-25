@@ -10,8 +10,11 @@ configuration:
     description: |
       Base URL for HA [Default: http://localhost:8123]
       Note: Typically should not need to be changed since browser runs on the 'localhost' server
-  ha_dashboard:
-    name: "HA Dashboard"
+  ha_dashboard_000:
+    name: "HA Dashboard 000"
+    description: 'Dashboard path (following "HA URL") [Default: ""]'
+  ha_dashboard_001:
+    name: "HA Dashboard 001"
     description: 'Dashboard path (following "HA URL") [Default: ""]'
   login_delay:
     name: "Login Delay"

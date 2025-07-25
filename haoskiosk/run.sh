@@ -15,7 +15,8 @@ trap '[ -n "$(jobs -p)" ] && kill $(jobs -p); [ -n "$TTY0_DELETED" ] && mknod -m
 #         HA_USERNAME
 #         HA_PASSWORD
 #         HA_URL
-#         HA_DASHBOARD
+#         HA_DASHBOARD_000
+#         HA_DASHBOARD_001
 #         HA_THEME
 #         HA_SIDEBAR
 #         LOGIN_DELAY
@@ -61,7 +62,8 @@ function get_config () {
 get_config HA_USERNAME
 get_config HA_PASSWORD "" 1 #Don't log password
 get_config HA_URL
-get_config HA_DASHBOARD
+get_config HA_DASHBOARD_000
+get_config HA_DASHBOARD_001
 get_config HA_THEME
 get_config HA_SIDEBAR
 get_config LOGIN_DELAY
@@ -176,7 +178,7 @@ echo "DEBUG_MODE=$DEBUG_MODE" #JJKCRAP
 if [ "$DEBUG_MODE" != true ]; then
     ### Run Luakit in the foreground
     bashio::log.info "Launching Luakit browser..."
-    exec luakit -U "$HA_URL/$HA_DASHBOARD"
+    exec luakit -U "$HA_URL/$HA_DASHBOARD_000"
 else ### Debug mode
     bashio::log.info "Entering debug mode (X & Openbox but no luakit browser)..."
     exec sleep infinite
